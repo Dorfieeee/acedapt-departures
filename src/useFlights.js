@@ -28,31 +28,26 @@ const filteredFlights = (flights) => {
   }, []);
 };
 
-const useFlights = (type, timeStamp) => {
-  const URL = "https://kabrudlev2.edinburghairport.com/api/flights/" + type;
-  const [flights, setFlights] = useState(null);
-
-  const fetchArrivals = useCallback(async () => {
-    let apiResponse, flights;
-    try {
-      apiResponse = await fetch(URL);
-      if (!apiResponse.ok) {
-        throw new Error(apiResponse.statusText);
-      }
-      flights = await apiResponse.json();
-      if (!flights) {
-        throw new Error("Arrivals JSON parse was not successfull.");
-      }
-    } catch (error) {
-      console.error(error);
-      return;
+const filteredFlights = (flights) => {
+  return flights.reduce((list, flight) => {
+    // 1 hours in milisecons
+    let oneHour = 1 * 60 * 60 * 1000;
+    let now = new Date();
+    let flightTime = new Date(flight["dateTime"]);
+    let isAirborne = (status) => status.startsWith("AIRBORNE");
+    // ignore flights older than 5 hours if airborne and those scheduled 5 hours later
+    if (
+      (now - flightTime > 5 * oneHour && isAirborne(flight["Status"])) ||
+      flightTime - now > 5 * oneHour
+    ) {
+      return list;
     }
-    setFlights(filteredFlights(flights));
-  }, [URL]);
-
-  useEffect(() => fetchArrivals(), [fetchArrivals, timeStamp]);
-
-  return [flights, fetchArrivals];
+    return list.concat([
+      headers.map((header) => {
+        return flight[header];
+      })
+    ]);
+  }, []);
 };
 
 export default useFlights;
