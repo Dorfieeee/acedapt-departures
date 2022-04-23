@@ -50,7 +50,7 @@ const Header = ({ interval, toggle, isLoaded }) => {
       >
         {isLoaded && (
           <img
-            src="../public/ACbus.png"
+            src="../ACbus.png"
             alt="Arnold Clark Shuttle Bus"
             width="140px"
             height="70px"
